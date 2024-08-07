@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipchem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: rgb(112, 108, 108);
+        }
+        .container {
+            padding: 20px;
+        }
+        .info {
+            margin-top: 20px;
+        }
+        .map-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .message-box {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+        .green {
+            color: green;
+            border: 2px solid green;
+        }
+        .red {
+            color: red;
+            border: 2px solid red;
+        }
+    </style>
+</head>
+<body onload="requestLocation()">
+    <div class="container">
+        <h1>Find Nearby Services</h1>
+        <p>Enable Location Services for Enhanced Security.</p>
+        <div class="info" id="info"></div>
+        <div id="map" class="map-container"></div>
+        <div id="message-box" class="message-box"></div>
+    </div>
+
+    <script>
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    showPosition,
+                    showError,
+                    { timeout: 10000 }  // Timeout after 10 seconds
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            var locationInfo = "<p>Your Location: Saudi Arabia</p>";
+
+            // Fetch location details from the IP address
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    locationInfo += "<p>Your IP Address: " + data.ip + "</p>";
+                    document.getElementById('info').innerHTML = locationInfo;
+                    showMessage("Incorrect Choice! By allowing location access, you’re permitting apps to track your exact location.", "red");
+                    showMap(lat, lon);
+                })
+                .catch(error => {
+                    console.error('Error fetching IP address:', error);
+                    document.getElementById('info').innerHTML = locationInfo;
+                    showMessage("Wrong Choice!!!", "red");
+                    showMap(lat, lon);
+                });
+        }
+
+        function showError(error) {
+            if (error.code === error.PERMISSION_DENIED) {
+                // User has blocked the location request
+                showMessage("Excellent Decision! By blocking location access, you are effectively safeguarding your privacy and preventing apps from tracking your exact whereabouts.", "green");
+            } else {
+                alert("An error occurred: " + error.message);
+            }
+        }
+
+        function showMap(lat, lon) {
+            var mapUrl = "https://www.google.com/maps?q=" + lat + "," + lon + "&output=embed";
+            document.getElementById("map").innerHTML = "<iframe src='" + mapUrl + "' width='100%' height='100%' style='border:0;'></iframe>";
+        }
+
+        function showMessage(message, color) {
+            var messageBox = document.getElementById('message-box');
+            messageBox.innerHTML = message;
+            messageBox.className = 'message-box ' + color;
+            messageBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
